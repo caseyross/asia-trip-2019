@@ -514,23 +514,6 @@
      {
       "type": "Feature",
       "properties": {
-       "url": "IMG_1594.jpg",
-       "date": "2019:08:23 03:27:01",
-       "size": 265296,
-       "type": "image/jpeg"
-      },
-      "geometry": {
-       "type": "Point",
-       "coordinates": [
-        -105.23289444444444,
-        39.98670277777778,
-        1630.3633633633633
-       ]
-      }
-     },
-     {
-      "type": "Feature",
-      "properties": {
        "url": "IMG_1597.jpg",
        "date": "2019:08:23 03:30:33",
        "size": 944639,
