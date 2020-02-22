@@ -1,0 +1,14 @@
+{
+  "browserslist": [
+    "last 1 chrome versions"
+  ],
+  "devDependencies": {
+    "parcel": "^1.12.4",
+    "parcel-plugin-svelte": "^4.0.6",
+    "svelte": "^3.18.1"
+  },
+  "scripts": {
+    "hack": "parcel index.html --no-cache",
+    "ship": "parcel build index.html"
+  }
+}
