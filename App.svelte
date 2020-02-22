@@ -36,7 +36,7 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		background: gray;
+		background: black;
 	}
 	img {
 		max-height: 100%;
@@ -49,7 +49,7 @@
 	let imgUrl = null
 	import photoLocations from './photo-locations.json'
 	photoLocations.features.sort((a, b) => (a.properties.date < b.properties.date) - 0.5)
-	Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIzZmM1ZTU4Zi0yZDc3LTQxYWQtOWFhNS1jMmM3NGJkYTRlNjMiLCJpZCI6MjIxOTcsInNjb3BlcyI6WyJhc3IiXSwiYXNzZXRzIjpbMV0sImlhdCI6MTU4MjMyODk2MX0.wB2frl_bf8vBKYj8r3Gzsxn8IvN88qHodTT9PCQBufE' // steal my bus pass I dare you
+	Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4NmZjNDk1ZS02Mjc1LTQ5YzgtODdhMy02MGMxMzA4MDg2MjIiLCJpZCI6MjIxOTcsInNjb3BlcyI6WyJhc3IiXSwiaWF0IjoxNTgyMzkyMDMxfQ.g2xsKoYIO5TwP2arlDG2YseVce2vhsuxfaWoWcEouNo' // steal my bus pass I dare you
 	import { onMount } from 'svelte'
 	onMount(() => {
 		viewer = new Cesium.Viewer(
@@ -85,8 +85,8 @@
 			entity.point = {
 				pixelSize: 6,
 				color: Cesium.Color.RED,
-				outlineWidth: 1,
-				outlineColor: Cesium.Color.BLACK
+				outlineWidth: 0.5,
+				outlineColor: Cesium.Color.BLACK,
     		}
 			viewer.entities.add(
 				new Cesium.Entity({
@@ -97,7 +97,7 @@
 						],
 						clampToGround: true,
 						width: 3,
-						material: Cesium.Color.RED
+						material: Cesium.Color.RED,
 					}
 				})
 			)
