@@ -2,8 +2,8 @@
 	<div id='cesium-root'>
 	</div>
 	<cite>
-		globe tech by <a href='https://cesium.com/cesiumjs/'>CESIUM</a><br>
-		map tiles by <a href='https://www.openstreetmap.org/about'>OPENSTREETMAP</a>
+		globe tech and world heightmaps by <a href='https://cesium.com/cesiumjs/'>CESIUM</a><br>
+		2d map imagery by <a href='https://www.mapbox.com/'>MAPBOX</a> & <a href='https://www.openstreetmap.org/about'>OPENSTREETMAP</a>
 	</cite>
 	<figure on:click={() => {imgUrl = null; viewer.selectedEntity = null}} style='visibility: {imgUrl ? "visible" : "hidden"}'>
 		<img src='./photos/{imgUrl}'>
@@ -55,7 +55,11 @@
 		viewer = new Cesium.Viewer(
 			'cesium-root',
 			{
-				imageryProvider: new Cesium.OpenStreetMapImageryProvider(),
+				imageryProvider: new Cesium.MapboxStyleImageryProvider({
+					username: 'caseyross',
+					styleId: 'ck73luvkf18551irtcwd95kwm',
+					accessToken: 'pk.eyJ1IjoiY2FzZXlyb3NzIiwiYSI6ImNrNzNpeTlyeDBka2EzbW11bWQ1Yno3bmwifQ.VF1A9UvUCKC8y1kFMEZ4pw'
+				}),
 				terrainProvider: Cesium.createWorldTerrain(),
 				skyAtmosphere: false,
 				animation: false,
@@ -84,8 +88,8 @@
 		for (const entity of viewer.dataSources.get(0).entities.values) {
 			entity.point = {
 				pixelSize: 6,
-				color: Cesium.Color.RED,
-				outlineWidth: 0.5,
+				color: Cesium.Color.WHITE,
+				outlineWidth: 1,
 				outlineColor: Cesium.Color.BLACK,
     		}
 			viewer.entities.add(
@@ -96,8 +100,8 @@
 							entity.position.getValue(now),
 						],
 						clampToGround: true,
-						width: 3,
-						material: Cesium.Color.RED,
+						width: 2,
+						material: Cesium.Color.RED
 					}
 				})
 			)
