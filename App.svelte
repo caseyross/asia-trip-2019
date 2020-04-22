@@ -45,22 +45,26 @@
 </style>
 
 <script>
-	let viewer = {}
-	let imgUrl = null
-	import photoLocations from './photo-locations.json'
-	photoLocations.features.sort((a, b) => (a.properties.date < b.properties.date) - 0.5)
-	Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4NmZjNDk1ZS02Mjc1LTQ5YzgtODdhMy02MGMxMzA4MDg2MjIiLCJpZCI6MjIxOTcsInNjb3BlcyI6WyJhc3IiXSwiaWF0IjoxNTgyMzkyMDMxfQ.g2xsKoYIO5TwP2arlDG2YseVce2vhsuxfaWoWcEouNo' // steal my bus pass I dare you
 	import { onMount } from 'svelte'
+	import photoData from './photoData.json'
+	let viewer = {}
+	const photosInView = []
+	let imgUrl = null
+	photoData.features.sort((a, b) => (a.properties.date < b.properties.date) - 0.5)
+	Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4NmZjNDk1ZS02Mjc1LTQ5YzgtODdhMy02MGMxMzA4MDg2MjIiLCJpZCI6MjIxOTcsInNjb3BlcyI6WyJhc3IiXSwiaWF0IjoxNTgyMzkyMDMxfQ.g2xsKoYIO5TwP2arlDG2YseVce2vhsuxfaWoWcEouNo' // steal my bus pass I dare you
 	onMount(() => {
 		viewer = new Cesium.Viewer(
 			'cesium-root',
 			{
+				// 2d map tiles
 				imageryProvider: new Cesium.MapboxStyleImageryProvider({
 					username: 'caseyross',
 					styleId: 'ck73luvkf18551irtcwd95kwm',
 					accessToken: 'pk.eyJ1IjoiY2FzZXlyb3NzIiwiYSI6ImNrNzNpeTlyeDBka2EzbW11bWQ1Yno3bmwifQ.VF1A9UvUCKC8y1kFMEZ4pw'
 				}),
+				// heightmap
 				terrainProvider: Cesium.createWorldTerrain(),
+				// turn off lots of stuff we don't need
 				skyAtmosphere: false,
 				animation: false,
 				baseLayerPicker : false,
@@ -74,11 +78,12 @@
 				infoBox: false
 			}
 		)
+		// draw the points and lines on the map
 		const now = Cesium.JulianDate.now()
 		viewer.entities.suspendEvents()
 		viewer.dataSources.add(
 			Cesium.GeoJsonDataSource.load(
-				photoLocations,
+				photoData,
 				{
 					markerSize: 0,
 				}
@@ -108,6 +113,7 @@
 			prevEntity = entity
 		}
 		viewer.entities.resumeEvents()
+		// look at japan
 		viewer.scene.camera.setView({
 			destination:
 				Cesium.Cartesian3.fromDegrees(
@@ -116,6 +122,7 @@
 					5000000 // height (m)
 				)
 		})
+		// show the pic when we click on a point
 		const eventHelper = new Cesium.EventHelper()
 		eventHelper.add(viewer.selectedEntityChanged,
 			() => 
@@ -123,6 +130,25 @@
 				? imgUrl = viewer.selectedEntity.properties.url.getValue(now)
 				: imgUrl = null
 		)
+		// recalc ambient pics when we drag the map
+		eventHelper.add(viewer.scene.camera.moveEnd,
+			() => {
+				const viewRectangle = viewer.scene.camera.computeViewRectangle(viewer.scene.globe.ellipsoid)
+				const latView = [viewRectangle.west * 180 / Math.PI, viewRectangle.east * 180 / Math.PI]
+				const lonView = [viewRectangle.south * 180 / Math.PI, viewRectangle.north * 180 / Math.PI]
+				photosInView.length = 0;
+				for (const photo of photoData.features) {
+					if (
+						photo.geometry.coordinates[0] > latView[0] &
+						photo.geometry.coordinates[0] < latView[1] &
+						photo.geometry.coordinates[1] > lonView[0] &
+						photo.geometry.coordinates[1] < lonView[1]
+					) {
+						photosInView.push(photo)
+					}
+				}
+		})
+		// don't zoom in on double click
 		viewer.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK)
 	})
 </script>
