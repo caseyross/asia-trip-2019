@@ -8,11 +8,15 @@
 		{#if selectedPhoto}
 			<figure on:click={() => {selectedPhoto = ''; viewer.selectedEntity = null}}>
 				<img src='./photos/{selectedPhoto}' id='fullsize-image'>
+				<time datetime='2019-08-22'>
+					aug 22 2019
+				</time>
+				<figcaption>tokyo</figcaption>
 			</figure>
 		{/if}
 	</nav>
 	<cite>
-		globe tech and world terrain by <a href='https://cesium.com/cesiumjs/'>CESIUM</a><br>
+		built with <a href='https://svelte.dev/'>svelte</a> & <a href='https://cesium.com/cesiumjs/'>cesium</a>
 	</cite>
 </div>
 
@@ -20,14 +24,16 @@
 	#main {
 		height: 100%;
 		display: flex;
+		color: white;
+		font-size: 12px;
 	}
 	map {
-		flex: 0 0 50%;
+		flex: 0 0 40%;
 		height: 100%;
 	}
 	nav {
 		position: relative;
-		flex: 0 0 50%;
+		flex: 0 0 60%;
 		height: 100%;
 		overflow: auto;
 		background: #222;
@@ -53,14 +59,25 @@
 		max-height: 100%;
 		max-width: 100%;
 	}
+	figcaption {
+		position: absolute;
+		top: 0;
+		left: 0;
+		padding: 8px;
+		font-weight: bold;
+	}
+	time {
+		position: absolute;
+		top: 0;
+		right: 0;
+		padding: 8px;
+		font-weight: bold;
+	}
 	cite {
 		position: absolute;
 		bottom: 0;
-		right: 50%;
-		color: white;
-		font-size: 12px;
-		padding: 8px 16px;
-		text-align: right;
+		right: 0;
+		padding: 8px;
 	}
 </style>
 
