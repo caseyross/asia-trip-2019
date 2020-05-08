@@ -1,32 +1,43 @@
-<map>
-	<div id='cesium-root'>
-	</div>
+<div id='main'>
+	<map id='cesium-root'>
+	</map>
+	<nav bind:this={thumbnailContainer}>
+		{#each photosInView as photo}
+			<div class='thumbnail-image' style='width: {thumbnailSize}px; height: {thumbnailSize}px' src='{photo.properties.url}' on:click={() => selectedPhoto = photo.properties.url}></div>
+		{/each}
+		{#if selectedPhoto}
+			<figure on:click={() => {selectedPhoto = ''; viewer.selectedEntity = null}}>
+				<img src='./photos/{selectedPhoto}' id='fullsize-image'>
+			</figure>
+		{/if}
+	</nav>
 	<cite>
-		globe tech and world heightmaps by <a href='https://cesium.com/cesiumjs/'>CESIUM</a><br>
-		2d map imagery by <a href='https://www.mapbox.com/'>MAPBOX</a> & <a href='https://www.openstreetmap.org/about'>OPENSTREETMAP</a>
+		globe tech and world terrain by <a href='https://cesium.com/cesiumjs/'>CESIUM</a><br>
 	</cite>
-	<figure on:click={() => {imgUrl = null; viewer.selectedEntity = null}} style='visibility: {imgUrl ? "visible" : "hidden"}'>
-		<img src='./photos/{imgUrl}'>
-	</figure>
-</map>
+</div>
 
 <style>
+	#main {
+		height: 100%;
+		display: flex;
+	}
 	map {
-		display: block;
+		flex: 0 0 50%;
 		height: 100%;
 	}
-	#cesium-root {
+	nav {
+		position: relative;
+		flex: 0 0 50%;
 		height: 100%;
+		overflow: auto;
+		background: #222;
 	}
-	cite {
-		position: absolute;
-		bottom: 0;
-		right: 0;
-		color: white;
-		font-size: 12px;
-		line-height: 1.5;
-		padding: 8px 16px;
-		text-align: right;
+	.thumbnail-image {
+		display: inline-block;
+		vertical-align: top;
+		box-sizing: border-box;
+		border:	1px solid black;
+		background: gray;
 	}
 	figure {
 		position: absolute;
@@ -36,32 +47,37 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		background: black;
+		background: #222;
 	}
-	img {
+	#fullsize-image {
 		max-height: 100%;
 		max-width: 100%;
+	}
+	cite {
+		position: absolute;
+		bottom: 0;
+		right: 50%;
+		color: white;
+		font-size: 12px;
+		padding: 8px 16px;
+		text-align: right;
 	}
 </style>
 
 <script>
 	import { onMount } from 'svelte'
 	import photoData from './photoData.json'
-	let viewer = {}
 	const photosInView = []
-	let imgUrl = null
-	photoData.features.sort((a, b) => (a.properties.date < b.properties.date) - 0.5)
+	let thumbnailContainer = {}
+	let thumbnailSize = 64
+	let selectedPhoto = null
+	let viewer = {}
+	photoData.features.sort((a, b) => (a.properties.date > b.properties.date) - 0.5)
 	Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4NmZjNDk1ZS02Mjc1LTQ5YzgtODdhMy02MGMxMzA4MDg2MjIiLCJpZCI6MjIxOTcsInNjb3BlcyI6WyJhc3IiXSwiaWF0IjoxNTgyMzkyMDMxfQ.g2xsKoYIO5TwP2arlDG2YseVce2vhsuxfaWoWcEouNo' // steal my bus pass I dare you
 	onMount(() => {
 		viewer = new Cesium.Viewer(
 			'cesium-root',
 			{
-				// 2d map tiles
-				imageryProvider: new Cesium.MapboxStyleImageryProvider({
-					username: 'caseyross',
-					styleId: 'ck73luvkf18551irtcwd95kwm',
-					accessToken: 'pk.eyJ1IjoiY2FzZXlyb3NzIiwiYSI6ImNrNzNpeTlyeDBka2EzbW11bWQ1Yno3bmwifQ.VF1A9UvUCKC8y1kFMEZ4pw'
-				}),
 				// heightmap
 				terrainProvider: Cesium.createWorldTerrain(),
 				// turn off lots of stuff we don't need
@@ -78,39 +94,24 @@
 				infoBox: false
 			}
 		)
-		// draw the points and lines on the map
-		const now = Cesium.JulianDate.now()
+		// draw the points on the map
 		viewer.entities.suspendEvents()
 		viewer.dataSources.add(
 			Cesium.GeoJsonDataSource.load(
 				photoData,
 				{
-					markerSize: 0,
+					markerSize: 0
 				}
 			)
 		)
-		let prevEntity = viewer.dataSources.get(0).entities.values[0]
 		for (const entity of viewer.dataSources.get(0).entities.values) {
 			entity.point = {
-				pixelSize: 6,
-				color: Cesium.Color.WHITE,
+				scaleByDistance: new Cesium.NearFarScalar(0, 1, 10000, 0.25),
+				pixelSize: 20,
+				color: Cesium.Color.RED,
 				outlineWidth: 1,
 				outlineColor: Cesium.Color.BLACK,
     		}
-			viewer.entities.add(
-				new Cesium.Entity({
-					polyline: {
-						positions: [
-							prevEntity.position.getValue(now),
-							entity.position.getValue(now),
-						],
-						clampToGround: true,
-						width: 2,
-						material: Cesium.Color.RED
-					}
-				})
-			)
-			prevEntity = entity
 		}
 		viewer.entities.resumeEvents()
 		// look at japan
@@ -123,14 +124,25 @@
 				)
 		})
 		// show the pic when we click on a point
+		let prevSelectedEntity = {
+			point: {}
+		}
+		const now = Cesium.JulianDate.now()
 		const eventHelper = new Cesium.EventHelper()
 		eventHelper.add(viewer.selectedEntityChanged,
-			() => 
-				viewer.selectedEntity && viewer.selectedEntity.point
-				? imgUrl = viewer.selectedEntity.properties.url.getValue(now)
-				: imgUrl = null
+			() => {
+				prevSelectedEntity.point.color = Cesium.Color.BLACK
+				prevSelectedEntity.point.outlineColor = Cesium.Color.WHITE
+				if(viewer.selectedEntity && viewer.selectedEntity.point) {
+					selectedPhoto = viewer.selectedEntity.properties.url.getValue(now)
+					viewer.selectedEntity.point.color = Cesium.Color.YELLOW
+					prevSelectedEntity = viewer.selectedEntity
+				} else {
+					selectedPhoto = ''
+				}
+			}
 		)
-		// recalc ambient pics when we drag the map
+		// recalc ambient pics & thumbnail size when we drag the map
 		eventHelper.add(viewer.scene.camera.moveEnd,
 			() => {
 				const viewRectangle = viewer.scene.camera.computeViewRectangle(viewer.scene.globe.ellipsoid)
@@ -147,6 +159,11 @@
 						photosInView.push(photo)
 					}
 				}
+				let numThumbnailsInRow = 0;
+				do {
+					numThumbnailsInRow ++;
+					thumbnailSize = Math.floor(thumbnailContainer.clientWidth / numThumbnailsInRow);
+				} while(Math.floor(thumbnailContainer.clientWidth / thumbnailSize) * Math.floor(thumbnailContainer.clientHeight / thumbnailSize) < photosInView.length)
 		})
 		// don't zoom in on double click
 		viewer.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK)
