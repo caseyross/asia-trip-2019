@@ -3,20 +3,16 @@
 	</map>
 	<nav bind:this={thumbnailContainer}>
 		{#each photosInView as photo}
-			<div class='thumbnail-image' style='width: {thumbnailSize}px; height: {thumbnailSize}px' src='{photo.properties.url}' on:click={() => selectedPhoto = photo.properties.url}></div>
+			<img class='thumbnail-image' style='width: {thumbnailSize}px; height: {thumbnailSize}px' src="./photos/{thumbnailSize > 191 ? 'full' : 'thumb'}/{photo.properties.url}" on:click={() => selectedPhoto = photo.properties.url}></div>
 		{/each}
 		{#if selectedPhoto}
 			<figure on:click={() => {selectedPhoto = ''; viewer.selectedEntity = null}}>
-				<img src='./photos/{selectedPhoto}' id='fullsize-image'>
-				<time datetime='2019-08-22'>
-					aug 22 2019
-				</time>
-				<figcaption>tokyo</figcaption>
+				<img src='./photos/full/{selectedPhoto}' id='closeup-image'>
 			</figure>
 		{/if}
 	</nav>
 	<cite>
-		built with <a href='https://svelte.dev/'>svelte</a> & <a href='https://cesium.com/cesiumjs/'>cesium</a>
+		built with <a href='https://cesium.com/cesiumjs/'>cesium</a> and <a href='https://svelte.dev/'>svelte</a>
 	</cite>
 </div>
 
@@ -28,12 +24,12 @@
 		font-size: 12px;
 	}
 	map {
-		flex: 0 0 40%;
+		flex: 1 1 auto;
 		height: 100%;
 	}
 	nav {
 		position: relative;
-		flex: 0 0 60%;
+		flex: 0 0 1008px;
 		height: 100%;
 		overflow: auto;
 		background: #222;
@@ -44,6 +40,12 @@
 		box-sizing: border-box;
 		border:	1px solid black;
 		background: gray;
+		object-fit: cover;
+		cursor: zoom-in;
+		opacity: 0.5;
+	}
+	.thumbnail-image:hover {
+		opacity: 1;
 	}
 	figure {
 		position: absolute;
@@ -55,35 +57,22 @@
 		align-items: center;
 		background: #222;
 	}
-	#fullsize-image {
+	#closeup-image {
 		max-height: 100%;
 		max-width: 100%;
-	}
-	figcaption {
-		position: absolute;
-		top: 0;
-		left: 0;
-		padding: 8px;
-		font-weight: bold;
-	}
-	time {
-		position: absolute;
-		top: 0;
-		right: 0;
-		padding: 8px;
-		font-weight: bold;
+		cursor: zoom-out;
 	}
 	cite {
 		position: absolute;
 		bottom: 0;
-		right: 0;
+		left: 0;
 		padding: 8px;
 	}
 </style>
 
 <script>
 	import { onMount } from 'svelte'
-	import photoData from './photoData.json'
+	import photoData from './photoData.geojson'
 	const photosInView = []
 	let thumbnailContainer = {}
 	let thumbnailSize = 64
