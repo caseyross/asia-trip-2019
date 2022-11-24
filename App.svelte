@@ -72,7 +72,7 @@
 
 <script>
 	import { onMount } from 'svelte'
-	import photoData from './photoData.geojson'
+	import photoData from './photoData.json'
 	const photosInView = []
 	let thumbnailContainer = {}
 	let thumbnailSize = 64
