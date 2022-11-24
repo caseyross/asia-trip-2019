@@ -3,7 +3,7 @@
 	</map>
 	<nav bind:this={thumbnailContainer}>
 		{#each photosInView as photo}
-			<img class='thumbnail-image' style='width: {thumbnailSize}px; height: {thumbnailSize}px' src="./photos/{thumbnailSize > 191 ? 'full' : 'thumb'}/{photo.properties.url}" on:click={() => selectedPhoto = photo.properties.url}></div>
+			<img class='thumbnail-image' style='width: {thumbnailSize}px; height: {thumbnailSize}px' src="./photos/{thumbnailSize > 191 ? 'full' : 'thumb'}/{photo.properties.url}" on:click={() => selectedPhoto = photo.properties.url}>
 		{/each}
 		{#if selectedPhoto}
 			<figure on:click={() => {selectedPhoto = ''; viewer.selectedEntity = null}}>
